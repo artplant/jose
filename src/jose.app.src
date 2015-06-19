@@ -1,0 +1,7 @@
+{application, jose, [
+    {description,"JavaScript Object Signing and Encryption"},
+    {vsn,"0.1"},
+    {modules,[]},
+    {registered,[]},
+    {applications,[]}
+]}.

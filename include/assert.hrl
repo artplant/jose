@@ -1,0 +1,2 @@
+-define(assertThrow(Condition, Error), case Condition of true -> ok; false -> throw(Error) end).
+-define(assertError(Condition, Error), case Condition of true -> ok; false -> error(Error) end).
