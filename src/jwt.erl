@@ -17,7 +17,7 @@
 
 -type jwt() :: binary().
 -type claims() :: jsx:json_term().
--type step() :: {'jws', jwk:jwk()} | {'jws', 'none'} | {'jwe', jwk:jwk()}.
+-type step() :: jws:jws_verify_result() | jwe:jwe_decrypt_result().
 
 %%%===================================================================
 %%% API
