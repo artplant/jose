@@ -48,6 +48,8 @@ load(Filename) ->
 
 -spec load_pem(file:filename_all()) -> jwk().
 
+%% @doc Genereate RSA PRIVATE KEY: openssl genrsa -out server.key 2048
+
 load_pem(Filename) ->
     load_pem(Filename, undefined).
 
@@ -207,5 +209,9 @@ der_entry_to_jwk('Certificate', Der) ->
 der_entry_to_jwk('PrivateKeyInfo', Der) ->
     #'PrivateKeyInfo'{privateKey = PrivateKey} = public_key:der_decode('PrivateKeyInfo', Der),
     RSAKey = public_key:der_decode('RSAPrivateKey', iolist_to_binary(PrivateKey)),
+    #'RSAPrivateKey'{modulus = N, publicExponent = E, privateExponent = D, prime1 = P1, prime2 = P2, exponent1 = E1, exponent2 = E2, coefficient = C} = RSAKey,
+    rsa_private([E, N, D, P1, P2, E1, E2, C]);
+der_entry_to_jwk('RSAPrivateKey', Der) ->
+    RSAKey = public_key:der_decode('RSAPrivateKey', Der),
     #'RSAPrivateKey'{modulus = N, publicExponent = E, privateExponent = D, prime1 = P1, prime2 = P2, exponent1 = E1, exponent2 = E2, coefficient = C} = RSAKey,
     rsa_private([E, N, D, P1, P2, E1, E2, C]).
