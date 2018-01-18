@@ -72,7 +72,7 @@ encode_compact(Plaintext, JoseHeader, JWK, Options) ->
             direct_key_agreement ->
                 AgreedKey;
             _ ->
-                crypto:rand_bytes(jwa:cek_size(Enc))
+                crypto:strong_rand_bytes(jwa:cek_size(Enc))
         end,
     EncryptedKey =
         case Mode of
@@ -88,7 +88,7 @@ encode_compact(Plaintext, JoseHeader, JWK, Options) ->
     ProtectedHeader = jose_utils:encode_json(JoseHeader),
     Base64UrlProtectedHeader = jose_base64url:encode(ProtectedHeader),
     Base64UrlEncryptedKey = jose_base64url:encode(EncryptedKey),
-    InitializationVector = crypto:rand_bytes(jwa:iv_size(Enc)),
+    InitializationVector = crypto:strong_rand_bytes(jwa:iv_size(Enc)),
     Base64UrlInitializationVector = jose_base64url:encode(InitializationVector),
     M = compress(maps:get(zip, JoseHeader, undefined), Plaintext),
     AAD = additional_authentication_data(Base64UrlProtectedHeader, Base64UrlEncryptedKey, Base64UrlInitializationVector, Draft),
