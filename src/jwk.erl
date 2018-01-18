@@ -10,6 +10,7 @@
 -export([
     set/1,
     load/1,
+    load_binary/1,
     load_pem/1,
     load_pem/2,
     load_der/1,
@@ -41,6 +42,14 @@ set(JWKs) ->
 
 load(Filename) ->
     {ok, Bin} = file:read_file(Filename),
+    case Bin of
+        <<"-----", _/binary>> -> load_pem_binary(Bin, undefined);
+        _ -> der_entry_to_jwk('Certificate', Bin)
+    end.    
+
+-spec load_binary(binary()) -> jwk().
+
+load_binary(Bin) ->
     case Bin of
         <<"-----", _/binary>> -> load_pem_binary(Bin, undefined);
         _ -> der_entry_to_jwk('Certificate', Bin)
