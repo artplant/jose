@@ -10,12 +10,14 @@
 -export([
     decode/2,
     decode/3,
+    encode/3,
     is_expired/1
 ]).
 
 -export_type([jwt/0, claims/0]).
 
 -type jwt() :: binary().
+-type jose_header() :: jsx:json_term().
 -type claims() :: jsx:json_term().
 -type step() :: jws:jws_verify_result() | jwe:jwe_decrypt_result().
 
@@ -32,6 +34,15 @@ decode(JWT, Keys) ->
 
 decode(JWT, Keys, Options) ->
     decode_steps(JWT, Keys, Options, []).
+
+-spec encode(claims(), jose_header(), jwk:jwk() | 'undefined') -> jwt().
+
+encode(Claims, JoseHeader, Key) ->
+    Payload = jose_utils:encode_json(Claims),
+    case maps:is_key(enc, JoseHeader) of
+        true -> jwe:encode_compact(Payload, JoseHeader, Key);
+        false -> jws:encode_compact(Payload, JoseHeader, Key)
+    end.
 
 -spec is_expired(claims()) -> boolean().
 
