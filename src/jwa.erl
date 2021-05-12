@@ -179,13 +179,13 @@ sign(<<"none">>, _Input, _JWK) ->
     <<>>;
 sign(<<"HS256">>, Input, JWK) ->
     Key = jwk:key(JWK, {symmetric, 256}),
-    crypto:hmac(sha256, Key, Input);
+    crypto:mac(hmac, sha256, Key, Input);
 sign(<<"HS384">>, Input, JWK) ->
     Key = jwk:key(JWK, {symmetric, 384}),
-    crypto:hmac(sha384, Key, Input);
+    crypto:mac(hmac, sha384, Key, Input);
 sign(<<"HS512">>, Input, JWK) ->
     Key = jwk:key(JWK, {symmetric, 512}),
-    crypto:hmac(sha512, Key, Input);
+    crypto:mac(hmac, sha512, Key, Input);
 sign(<<"RS256">>, Input, JWK) ->
     Key = jwk:key(JWK, {rsa_private, 2048}),
     crypto:sign(rsa, sha256, Input, Key);
@@ -219,13 +219,13 @@ verify(<<"none">>, _Input, Signature, _JWK) ->
     Signature =:= <<>>;
 verify(<<"HS256">>, Input, Signature, JWK) ->
     Key = jwk:key(JWK, {symmetric, 256}),
-    crypto:hmac(sha256, Key, Input) =:= Signature;
+    crypto:mac(hmac, sha256, Key, Input) =:= Signature;
 verify(<<"HS384">>, Input, Signature, JWK) ->
     Key = jwk:key(JWK, {symmetric, 384}),
-    crypto:hmac(sha384, Key, Input) =:= Signature;
+    crypto:mac(hmac, sha384, Key, Input) =:= Signature;
 verify(<<"HS512">>, Input, Signature, JWK) ->
     Key = jwk:key(JWK, {symmetric, 512}),
-    crypto:hmac(sha512, Key, Input) =:= Signature;
+    crypto:mac(hmac, sha512, Key, Input) =:= Signature;
 verify(<<"RS256">>, Input, Signature, JWK) ->
     Key = jwk:key(JWK, {rsa_public, 2048}),
     crypto:verify(rsa, sha256, Input, Signature, Key);
@@ -342,14 +342,14 @@ encrypt(<<"A128CBC-HS256">>, Plaintext, CEK, IV, AAD) ->
     AL = bit_size(AAD),
     Ciphertext = crypto:block_encrypt(aes_cbc128, ENC_KEY, IV, pkcs7_pad(Plaintext, 16)),
     IntegrityData = <<AAD/binary, IV/binary, Ciphertext/binary, AL:8/big-unsigned-integer-unit:8>>,
-    <<HMAC:16/binary, _/binary>> = crypto:hmac(sha256, MAC_KEY, IntegrityData),
+    <<HMAC:16/binary, _/binary>> = crypto:mac(hmac, sha256, MAC_KEY, IntegrityData),
     {Ciphertext, HMAC};
 encrypt(<<"A256CBC-HS512">>, Plaintext, CEK, IV, AAD) ->
     <<MAC_KEY:32/binary, ENC_KEY:32/binary>> = CEK,
     AL = bit_size(AAD),
     Ciphertext = crypto:block_encrypt(aes_cbc256, ENC_KEY, IV, pkcs7_pad(Plaintext, 16)),
     IntegrityData = <<AAD/binary, IV/binary, Ciphertext/binary, AL:8/big-unsigned-integer-unit:8>>,
-    <<HMAC:32/binary, _/binary>> = crypto:hmac(sha512, MAC_KEY, IntegrityData),
+    <<HMAC:32/binary, _/binary>> = crypto:mac(hmac, sha512, MAC_KEY, IntegrityData),
     {Ciphertext, HMAC};
 encrypt(Enc, _, _, _, _) ->
     error({unsupported_enc, Enc}).
@@ -360,7 +360,7 @@ decrypt(<<"A128CBC-HS256">>, Ciphertext, CEK, IV, AAD, Tag, _Header) ->
     <<MAC_KEY:16/binary, ENC_KEY:16/binary>> = CEK,
     AL = bit_size(AAD),
     IntegrityData = <<AAD/binary, IV/binary, Ciphertext/binary, AL:8/big-unsigned-integer-unit:8>>,
-    <<HMAC:16/binary, _/binary>> = crypto:hmac(sha256, MAC_KEY, IntegrityData),
+    <<HMAC:16/binary, _/binary>> = crypto:mac(hmac, sha256, MAC_KEY, IntegrityData),
     case HMAC =:= Tag of
         true -> ok;
         false -> error(invalid_authentication_tag)
@@ -370,7 +370,7 @@ decrypt(<<"A256CBC-HS512">>, Ciphertext, CEK, IV, AAD, Tag, _Header) ->
     <<MAC_KEY:32/binary, ENC_KEY:32/binary>> = CEK,
     AL = bit_size(AAD),
     IntegrityData = <<AAD/binary, IV/binary, Ciphertext/binary, AL:8/big-unsigned-integer-unit:8>>,
-    <<HMAC:32/binary, _/binary>> = crypto:hmac(sha512, MAC_KEY, IntegrityData),
+    <<HMAC:32/binary, _/binary>> = crypto:mac(hmac, sha512, MAC_KEY, IntegrityData),
     case HMAC =:= Tag of
         true -> ok;
         false -> error(invalid_authentication_tag)
@@ -382,7 +382,7 @@ decrypt(<<"A128CBC+HS256">>, Ciphertext, CMK, IV, AAD, Tag, Header) ->
     CEK = concat_kdf(CMK, 128, <<128:32, "A128CBC+HS256">>, ?sz_string(Epu), ?sz_string(Epv), <<"Encryption">>, <<>>),
     CIK = concat_kdf(CMK, 256, <<256:32, "A128CBC+HS256">>, ?sz_string(Epu), ?sz_string(Epv), <<"Integrity">>, <<>>),
     IntegrityData = <<AAD/binary, $., (jose_base64url:encode(Ciphertext))/binary>>,
-    <<HMAC:32/binary, _/binary>> = crypto:hmac(sha256, CIK, IntegrityData),
+    <<HMAC:32/binary, _/binary>> = crypto:mac(hmac, sha256, CIK, IntegrityData),
     case HMAC =:= Tag of
         true -> ok;
         false -> error(invalid_authentication_tag)
