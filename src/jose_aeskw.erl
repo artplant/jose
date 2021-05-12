@@ -41,11 +41,11 @@ iv() ->
     16#a6a6a6a6a6a6a6a6.
 
 aes_encrypt(KEK, Data) when bit_size(KEK) =:= 128 ->
-    crypto:block_encrypt(aes_cbc128, KEK, <<0:128>>, Data);
+    crypto:crypto_one_time(aes_128_cbc, KEK, <<0:128>>, Data, true);
 aes_encrypt(KEK, Data) when bit_size(KEK) =:= 256 ->
-    crypto:block_encrypt(aes_cbc256, KEK, <<0:128>>, Data).
+    crypto:crypto_one_time(aes_256_cbc, KEK, <<0:128>>, Data, true).
 
 aes_decrypt(KEK, Data) when bit_size(KEK) =:= 128 ->
-    crypto:block_decrypt(aes_cbc128, KEK, <<0:128>>, Data);
+    crypto:crypto_one_time(aes_128_cbc, KEK, <<0:128>>, Data, false);
 aes_decrypt(KEK, Data) when bit_size(KEK) =:= 256 ->
-    crypto:block_decrypt(aes_cbc256, KEK, <<0:128>>, Data).
+    crypto:crypto_one_time(aes_256_cbc, KEK, <<0:128>>, Data, false).

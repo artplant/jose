@@ -340,14 +340,14 @@ iv_size(Enc) -> error({unsupported_enc, Enc}).
 encrypt(<<"A128CBC-HS256">>, Plaintext, CEK, IV, AAD) ->
     <<MAC_KEY:16/binary, ENC_KEY:16/binary>> = CEK,
     AL = bit_size(AAD),
-    Ciphertext = crypto:block_encrypt(aes_cbc128, ENC_KEY, IV, pkcs7_pad(Plaintext, 16)),
+    Ciphertext = crypto:crypto_one_time(aes_128_cbc, ENC_KEY, IV, pkcs7_pad(Plaintext, 16), true),
     IntegrityData = <<AAD/binary, IV/binary, Ciphertext/binary, AL:8/big-unsigned-integer-unit:8>>,
     <<HMAC:16/binary, _/binary>> = crypto:mac(hmac, sha256, MAC_KEY, IntegrityData),
     {Ciphertext, HMAC};
 encrypt(<<"A256CBC-HS512">>, Plaintext, CEK, IV, AAD) ->
     <<MAC_KEY:32/binary, ENC_KEY:32/binary>> = CEK,
     AL = bit_size(AAD),
-    Ciphertext = crypto:block_encrypt(aes_cbc256, ENC_KEY, IV, pkcs7_pad(Plaintext, 16)),
+    Ciphertext = crypto:crypto_one_time(aes_256_cbc, ENC_KEY, IV, pkcs7_pad(Plaintext, 16), true),
     IntegrityData = <<AAD/binary, IV/binary, Ciphertext/binary, AL:8/big-unsigned-integer-unit:8>>,
     <<HMAC:32/binary, _/binary>> = crypto:mac(hmac, sha512, MAC_KEY, IntegrityData),
     {Ciphertext, HMAC};
@@ -365,7 +365,7 @@ decrypt(<<"A128CBC-HS256">>, Ciphertext, CEK, IV, AAD, Tag, _Header) ->
         true -> ok;
         false -> error(invalid_authentication_tag)
     end,
-    pkcs7_unpad(crypto:block_decrypt(aes_cbc128, ENC_KEY, IV, Ciphertext));
+    pkcs7_unpad(crypto:crypto_one_time(aes_128_cbc, ENC_KEY, IV, Ciphertext, false));
 decrypt(<<"A256CBC-HS512">>, Ciphertext, CEK, IV, AAD, Tag, _Header) ->
     <<MAC_KEY:32/binary, ENC_KEY:32/binary>> = CEK,
     AL = bit_size(AAD),
@@ -375,7 +375,7 @@ decrypt(<<"A256CBC-HS512">>, Ciphertext, CEK, IV, AAD, Tag, _Header) ->
         true -> ok;
         false -> error(invalid_authentication_tag)
     end,
-    pkcs7_unpad(crypto:block_decrypt(aes_cbc256, ENC_KEY, IV, Ciphertext));
+    pkcs7_unpad(crypto:crypto_one_time(aes_256_cbc, ENC_KEY, IV, Ciphertext, false));
 decrypt(<<"A128CBC+HS256">>, Ciphertext, CMK, IV, AAD, Tag, Header) ->
     Epu = jose_base64url:decode(maps:get(epu, Header, <<>>)),
     Epv = jose_base64url:decode(maps:get(epv, Header, <<>>)),
@@ -387,7 +387,7 @@ decrypt(<<"A128CBC+HS256">>, Ciphertext, CMK, IV, AAD, Tag, Header) ->
         true -> ok;
         false -> error(invalid_authentication_tag)
     end,
-    pkcs7_unpad(crypto:block_decrypt(aes_cbc128, CEK, IV, Ciphertext));
+    pkcs7_unpad(crypto:crypto_one_time(aes_128_cbc, CEK, IV, Ciphertext, false));
 decrypt(Enc, _, _, _, _, _, _) ->
     error({unsupported_enc, Enc}).
 
