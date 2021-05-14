@@ -6,6 +6,7 @@
 %% Include files
 -include_lib("eunit/include/eunit.hrl").
 -include("jose.hrl").
+-include("names.hrl").
 
 %% Exported Functions
 
@@ -18,22 +19,22 @@
 
 -define(plaintext, <<"Live long and prosper.">>).
 
--define(rsa_key, #{kty => <<"RSA">>,
-      n => <<"sXchDaQebHnPiGvyDOAT4saGEUetSyo9MKLOoWFsueri23bOdgWp4Dy1WlUzewbgBHod5pcM9H95GQRV3JDXboIRROSBigeC5yjU1hGzHHyXss8UDprecbAYxknTcQkhslANGRUZmdTOQ5qTRsLAt6BTYuyvVRdhS8exSZEy_c4gs_7svlJJQ4H9_NxsiIoLwAEk7-Q3UXERGYw_75IDrGA84-lA_-Ct4eTlXHBIY2EaV7t7LjJaynVJCpkv4LKjTTAumiGUIuQhrNhZLuF_RJLqHpM2kgWFLU7-VTdL1VbC2tejvcI2BlMkEpk1BzBZI0KQB0GaDWFLN-aEAw3vRw">>,
-      e => <<"AQAB">>,
-      d => <<"VFCWOqXr8nvZNyaaJLXdnNPXZKRaWCjkU5Q2egQQpTBMwhprMzWzpR8Sxq1OPThh_J6MUD8Z35wky9b8eEO0pwNS8xlh1lOFRRBoNqDIKVOku0aZb-rynq8cxjDTLZQ6Fz7jSjR1Klop-YKaUHc9GsEofQqYruPhzSA-QgajZGPbE_0ZaVDJHfyd7UUBUKunFMScbflYAAOYJqVIVwaYR5zWEEceUjNnTNo_CVSj-VvXLO5VZfCUAVLgW4dpf1SrtZjSt34YLsRarSb127reG_DUwg9Ch-KyvjT1SkHgUWRVGcyly7uvVGRSDwsXypdrNinPA4jlhoNdizK2zF2CWQ">>,
-      p => <<"9gY2w6I6S6L0juEKsbeDAwpd9WMfgqFoeA9vEyEUuk4kLwBKcoe1x4HG68ik918hdDSE9vDQSccA3xXHOAFOPJ8R9EeIAbTi1VwBYnbTp87X-xcPWlEPkrdoUKW60tgs1aNd_Nnc9LEVVPMS390zbFxt8TN_biaBgelNgbC95sM">>,
-      q => <<"uKlCKvKv_ZJMVcdIs5vVSU_6cPtYI1ljWytExV_skstvRSNi9r66jdd9-yBhVfuG4shsp2j7rGnIio901RBeHo6TPKWVVykPu1iYhQXw1jIABfw-MVsN-3bQ76WLdt2SDxsHs7q7zPyUyHXmps7ycZ5c72wGkUwNOjYelmkiNS0">>,
-      dp => <<"w0kZbV63cVRvVX6yk3C8cMxo2qCM4Y8nsq1lmMSYhG4EcL6FWbX5h9yuvngs4iLEFk6eALoUS4vIWEwcL4txw9LsWH_zKI-hwoReoP77cOdSL4AVcraHawlkpyd2TWjE5evgbhWtOxnZee3cXJBkAi64Ik6jZxbvk-RR3pEhnCs">>,
-      dq => <<"o_8V14SezckO6CNLKs_btPdFiO9_kC1DsuUTd2LAfIIVeMZ7jn1Gus_Ff7B7IVx3p5KuBGOVF8L-qifLb6nQnLysgHDh132NDioZkhH7mI7hPG-PYE_odApKdnqECHWw0J-F0JWnUd6D2B_1TvF9mXA2Qx-iGYn8OVV1Bsmp6qU">>,
-      qi => <<"eNho5yRBEBxhGBtQRww9QirZsB66TrfFReG_CcteI1aCneT0ELGhYlRlCtUkTRclIfuEPmNsNDPbLoLqqCVznFbvdB7x-Tl-m0l_eFTj2KiqwGqE9PZB9nNTwMVvH3VRRSLWACvPnSiwP8N5Usy-WRXS-V7TbpxIhvepTfE0NNo">>
+-define(rsa_key, #{?kty => <<"RSA">>,
+      ?n => <<"sXchDaQebHnPiGvyDOAT4saGEUetSyo9MKLOoWFsueri23bOdgWp4Dy1WlUzewbgBHod5pcM9H95GQRV3JDXboIRROSBigeC5yjU1hGzHHyXss8UDprecbAYxknTcQkhslANGRUZmdTOQ5qTRsLAt6BTYuyvVRdhS8exSZEy_c4gs_7svlJJQ4H9_NxsiIoLwAEk7-Q3UXERGYw_75IDrGA84-lA_-Ct4eTlXHBIY2EaV7t7LjJaynVJCpkv4LKjTTAumiGUIuQhrNhZLuF_RJLqHpM2kgWFLU7-VTdL1VbC2tejvcI2BlMkEpk1BzBZI0KQB0GaDWFLN-aEAw3vRw">>,
+      ?e => <<"AQAB">>,
+      ?d => <<"VFCWOqXr8nvZNyaaJLXdnNPXZKRaWCjkU5Q2egQQpTBMwhprMzWzpR8Sxq1OPThh_J6MUD8Z35wky9b8eEO0pwNS8xlh1lOFRRBoNqDIKVOku0aZb-rynq8cxjDTLZQ6Fz7jSjR1Klop-YKaUHc9GsEofQqYruPhzSA-QgajZGPbE_0ZaVDJHfyd7UUBUKunFMScbflYAAOYJqVIVwaYR5zWEEceUjNnTNo_CVSj-VvXLO5VZfCUAVLgW4dpf1SrtZjSt34YLsRarSb127reG_DUwg9Ch-KyvjT1SkHgUWRVGcyly7uvVGRSDwsXypdrNinPA4jlhoNdizK2zF2CWQ">>,
+      ?p => <<"9gY2w6I6S6L0juEKsbeDAwpd9WMfgqFoeA9vEyEUuk4kLwBKcoe1x4HG68ik918hdDSE9vDQSccA3xXHOAFOPJ8R9EeIAbTi1VwBYnbTp87X-xcPWlEPkrdoUKW60tgs1aNd_Nnc9LEVVPMS390zbFxt8TN_biaBgelNgbC95sM">>,
+      ?q => <<"uKlCKvKv_ZJMVcdIs5vVSU_6cPtYI1ljWytExV_skstvRSNi9r66jdd9-yBhVfuG4shsp2j7rGnIio901RBeHo6TPKWVVykPu1iYhQXw1jIABfw-MVsN-3bQ76WLdt2SDxsHs7q7zPyUyHXmps7ycZ5c72wGkUwNOjYelmkiNS0">>,
+      ?dp => <<"w0kZbV63cVRvVX6yk3C8cMxo2qCM4Y8nsq1lmMSYhG4EcL6FWbX5h9yuvngs4iLEFk6eALoUS4vIWEwcL4txw9LsWH_zKI-hwoReoP77cOdSL4AVcraHawlkpyd2TWjE5evgbhWtOxnZee3cXJBkAi64Ik6jZxbvk-RR3pEhnCs">>,
+      ?dq => <<"o_8V14SezckO6CNLKs_btPdFiO9_kC1DsuUTd2LAfIIVeMZ7jn1Gus_Ff7B7IVx3p5KuBGOVF8L-qifLb6nQnLysgHDh132NDioZkhH7mI7hPG-PYE_odApKdnqECHWw0J-F0JWnUd6D2B_1TvF9mXA2Qx-iGYn8OVV1Bsmp6qU">>,
+      ?qi => <<"eNho5yRBEBxhGBtQRww9QirZsB66TrfFReG_CcteI1aCneT0ELGhYlRlCtUkTRclIfuEPmNsNDPbLoLqqCVznFbvdB7x-Tl-m0l_eFTj2KiqwGqE9PZB9nNTwMVvH3VRRSLWACvPnSiwP8N5Usy-WRXS-V7TbpxIhvepTfE0NNo">>
      }).
 
 decode_rsa1_5_a128cbc_hs256_test() ->
     ?assertMatch({?plaintext, #jwe_decrypt_result{}}, jwe:decode_compact(?jwe_rsa1_5_a128cbc_hs256, ?rsa_key)).
 
 encode_rsa1_5_a128cbc_hs256_test() ->
-    JoseHeader = #{alg => <<"RSA1_5">>, enc => <<"A128CBC-HS256">>},
+    JoseHeader = #{?alg => <<"RSA1_5">>, ?enc => <<"A128CBC-HS256">>},
     JWE = jwe:encode_compact(?plaintext, JoseHeader, ?rsa_key),
     ?assertMatch({?plaintext, #jwe_decrypt_result{}}, jwe:decode_compact(JWE, ?rsa_key)).
 
@@ -45,7 +46,7 @@ decode_rsa1_5_a128cbc_hs256_draft9_test() ->
     ?assertMatch({?plaintext, #jwe_decrypt_result{}}, jwe:decode_compact(?jwe_rsa1_5_a128cbc_hs256_draft9, ?rsa_key, [{jwe_draft, 9}])).
 
 encode_rsa1_5_a128cbc_hs256_draft9_test() ->
-    JoseHeader = #{alg => <<"RSA1_5">>, enc => <<"A128CBC-HS256">>},
+    JoseHeader = #{?alg => <<"RSA1_5">>, ?enc => <<"A128CBC-HS256">>},
     JWE = jwe:encode_compact(?plaintext, JoseHeader, ?rsa_key, [{jwe_draft, 9}]),
     ?assertMatch({?plaintext, #jwe_decrypt_result{}}, jwe:decode_compact(JWE, ?rsa_key, [{jwe_draft, 9}])).
 
@@ -62,7 +63,7 @@ decode_rsa1_5_a128cbc_hs256_draft7_test() ->
 
 -define(jwe_a128kw_a128cbc_hs256, <<"eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0.6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOQ.AxY8DCtDaGlsbGljb3RoZQ.KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY.U0m_YmjN04DJvceFICbCVQ">>).
 
--define(oct_key, #{kty => <<"oct">>, k => <<"GawgguFyGrWKav7AX4VKUg">>}).
+-define(oct_key, #{?kty => <<"oct">>, ?k => <<"GawgguFyGrWKav7AX4VKUg">>}).
 
 decode_a128kw_a128cbc_hs256_test() ->
     ?assertMatch({?plaintext, #jwe_decrypt_result{}}, jwe:decode_compact(?jwe_a128kw_a128cbc_hs256, ?oct_key)).

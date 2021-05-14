@@ -1,6 +1,6 @@
 {application, jose, [
     {description,"JavaScript Object Signing and Encryption"},
-    {vsn,"0.1"},
+    {vsn,"0.2"},
     {modules,[]},
     {registered,[]},
     {applications,[]}

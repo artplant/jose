@@ -6,6 +6,7 @@
 %% Include files
 -include("jose.hrl").
 -include("assert.hrl").
+-include("names.hrl").
 
 %% Exported Functions
 
@@ -45,12 +46,12 @@ decode_compact(JWE, Keys, Options) ->
     Ciphertext = jose_base64url:decode(Base64UrlCiphertext),
     AuthenticationTag = jose_base64url:decode(Base64UrlAuthenticationTag),
     JoseHeader = jose_utils:decode_json(ProtectedHeader),
-    #{alg := Alg, enc := Enc} = JoseHeader,
+    #{?alg := Alg, ?enc := Enc} = JoseHeader,
     AAD = additional_authentication_data(Base64UrlProtectedHeader, Base64UrlEncryptedKey, Base64UrlInitializationVector, Draft),
     MatchingKeys = jose_keys:select_keys(JoseHeader, Keys),
     {DecryptedData, JWK} = decode_any(Alg, Enc, JoseHeader, EncryptedKey, Ciphertext, InitializationVector, AAD, AuthenticationTag, MatchingKeys),
     Result = #jwe_decrypt_result{alg = Alg, enc = Enc, header = JoseHeader, jwk = JWK},
-    Zip = maps:get(zip, JoseHeader, undefined),
+    Zip = maps:get(?zip, JoseHeader, undefined),
     {decompress(Zip, DecryptedData), Result}.
 
 encode_compact(Plaintext, JoseHeader, JWK) ->
@@ -58,7 +59,7 @@ encode_compact(Plaintext, JoseHeader, JWK) ->
 
 encode_compact(Plaintext, JoseHeader, JWK, Options) ->
     Draft = proplists:get_value(jwe_draft, Options, 40),
-    #{alg := Alg, enc := Enc} = JoseHeader,
+    #{?alg := Alg, ?enc := Enc} = JoseHeader,
     Mode = jwa:key_management_mode(Alg),
     AgreedKey =
         if 
@@ -90,7 +91,7 @@ encode_compact(Plaintext, JoseHeader, JWK, Options) ->
     Base64UrlEncryptedKey = jose_base64url:encode(EncryptedKey),
     InitializationVector = crypto:strong_rand_bytes(jwa:iv_size(Enc)),
     Base64UrlInitializationVector = jose_base64url:encode(InitializationVector),
-    M = compress(maps:get(zip, JoseHeader, undefined), Plaintext),
+    M = compress(maps:get(?zip, JoseHeader, undefined), Plaintext),
     AAD = additional_authentication_data(Base64UrlProtectedHeader, Base64UrlEncryptedKey, Base64UrlInitializationVector, Draft),
     {Ciphertext, AuthenticationTag} = jwa:encrypt(Enc, M, CEK, InitializationVector, AAD),
     Base64UrlCiphertext = jose_base64url:encode(Ciphertext),

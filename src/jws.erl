@@ -6,6 +6,7 @@
 %% Include files
 -include("jose.hrl").
 -include("assert.hrl").
+-include("names.hrl").
 
 %% Exported Functions
 
@@ -36,7 +37,7 @@
 encode_compact(Payload, JoseHeader, JWK) ->
     Base64UrlProtectedHeader = jose_base64url:encode(jose_utils:encode_json(JoseHeader)),
     Base64UrlPayload = jose_base64url:encode(Payload),
-    #{alg := Alg} = JoseHeader,
+    #{?alg := Alg} = JoseHeader,
     SigningInput = signing_input(Base64UrlProtectedHeader, Base64UrlPayload),
     Signature = jwa:sign(Alg, SigningInput, JWK),
     Base64UrlSignature = jose_base64url:encode(Signature),
@@ -62,9 +63,9 @@ decode_json(JWS, Keys) ->
 -spec decode_json(jsx:json_term(), jwks(), decode_options()) -> {boolean(), binary(), [jws_verify_result()]}.
 
 decode_json(JWS, Keys, Options) ->
-    #{payload := Base64UrlPayload} = JWS,
+    #{<<"payload">> := Base64UrlPayload} = JWS,
     Results =
-        case maps:get(signatures, JWS, undefined) of
+        case maps:get(<<"signatures">>, JWS, undefined) of
             undefined ->
                 [ verify_json_signature(JWS, Base64UrlPayload, Keys, Options) ];
             Signatures ->
@@ -92,9 +93,9 @@ complete_header(UnprotectedHeader, ProtectedHeader) ->
     maps:merge(UnprotectedHeader, ProtectedHeader).
 
 verify_json_signature(Json, Base64UrlPayload, Keys, Options) ->
-    UnprotectedHeader = maps:get(header, Json, undefined),
-    Base64UrlProtectedHeader = maps:get(protected, Json, undefined),
-    Base64UrlSignature = maps:get(signature, Json),
+    UnprotectedHeader = maps:get(<<"header">>, Json, undefined),
+    Base64UrlProtectedHeader = maps:get(<<"protected">>, Json, undefined),
+    Base64UrlSignature = maps:get(<<"signature">>, Json),
     verify_signature(UnprotectedHeader, Base64UrlProtectedHeader, Base64UrlPayload, Base64UrlSignature, Keys, Options).
 
 verify_signature(UnprotectedHeader, Base64UrlProtectedHeader, Base64UrlPayload, Base64UrlSignature, Keys, Options) ->
@@ -106,7 +107,7 @@ verify_signature(UnprotectedHeader, Base64UrlProtectedHeader, Base64UrlPayload, 
             _ -> jose_utils:decode_json(jose_base64url:decode(Base64UrlProtectedHeader))
         end,
     Header = complete_header(UnprotectedHeader, ProtectedHeader),
-    Alg = maps:get(alg, Header),
+    Alg = maps:get(?alg, Header),
     try
         ?assertThrow(is_accepted_alg(Alg, Options), {jws_alg_not_accepted, Alg}),
         Key =

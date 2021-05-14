@@ -17,7 +17,7 @@
 %%% API
 %%%===================================================================
 decode_json(Binary) ->
-    jsx:decode(Binary, [return_maps, {labels, atom}]).
+    jsx:decode(Binary, [return_maps]).
 
 encode_json(Json) ->
     jsx:encode(Json).

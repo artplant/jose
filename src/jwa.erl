@@ -118,6 +118,7 @@
 
 %% Include files
 -include_lib("public_key/include/public_key.hrl").
+-include("names.hrl").
 -include("assert.hrl").
 
 %% Exported Functions
@@ -266,7 +267,7 @@ key_management_mode(<<"dir">>) -> direct_key_agreement;
 key_management_mode(Alg) -> error({unsupported_alg, Alg}).
 
 producer_agreed_key(<<"ECDH-ES">>, JWK, EcPrivateEphemeralKey, Header) ->
-    ecdh_es_agreed_key(maps:get(enc, Header), 128, Header, JWK, EcPrivateEphemeralKey);
+    ecdh_es_agreed_key(maps:get(?enc, Header), 128, Header, JWK, EcPrivateEphemeralKey);
 producer_agreed_key(<<"ECDH-ES+A128KW">> = Alg, JWK, EcPrivateEphemeralKey, Header) ->
     ecdh_es_agreed_key(Alg, 128, Header, JWK, EcPrivateEphemeralKey);
 producer_agreed_key(<<"ECDH-ES+A256KW">> = Alg, JWK, EcPrivateEphemeralKey, Header) ->
@@ -277,11 +278,11 @@ producer_agreed_key(Alg, _Key, _, _Header) ->
     error({unsupported_alg, Alg}).
 
 consumer_agreed_key(<<"ECDH-ES">>, JWK, Header) ->
-    ecdh_es_agreed_key(maps:get(enc, Header), 128, Header, maps:get(epk, Header), JWK);
+    ecdh_es_agreed_key(maps:get(?enc, Header), 128, Header, maps:get(?epk, Header), JWK);
 consumer_agreed_key(<<"ECDH-ES+A128KW">> = Alg, JWK, Header) ->
-    ecdh_es_agreed_key(Alg, 128, Header, maps:get(epk, Header), JWK);
+    ecdh_es_agreed_key(Alg, 128, Header, maps:get(?epk, Header), JWK);
 consumer_agreed_key(<<"ECDH-ES+A256KW">> = Alg, JWK, Header) ->
-    ecdh_es_agreed_key(Alg, 256, Header, maps:get(epk, Header), JWK);
+    ecdh_es_agreed_key(Alg, 256, Header, maps:get(?epk, Header), JWK);
 consumer_agreed_key(<<"dir">>, SymmetricKey, _Header) ->
     SymmetricKey;
 consumer_agreed_key(Alg, _Key, _Header) ->
@@ -377,8 +378,8 @@ decrypt(<<"A256CBC-HS512">>, Ciphertext, CEK, IV, AAD, Tag, _Header) ->
     end,
     pkcs7_unpad(crypto:crypto_one_time(aes_256_cbc, ENC_KEY, IV, Ciphertext, false));
 decrypt(<<"A128CBC+HS256">>, Ciphertext, CMK, IV, AAD, Tag, Header) ->
-    Epu = jose_base64url:decode(maps:get(epu, Header, <<>>)),
-    Epv = jose_base64url:decode(maps:get(epv, Header, <<>>)),
+    Epu = jose_base64url:decode(maps:get(?epu, Header, <<>>)),
+    Epv = jose_base64url:decode(maps:get(?epv, Header, <<>>)),
     CEK = concat_kdf(CMK, 128, <<128:32, "A128CBC+HS256">>, ?sz_string(Epu), ?sz_string(Epv), <<"Encryption">>, <<>>),
     CIK = concat_kdf(CMK, 256, <<256:32, "A128CBC+HS256">>, ?sz_string(Epu), ?sz_string(Epv), <<"Integrity">>, <<>>),
     IntegrityData = <<AAD/binary, $., (jose_base64url:encode(Ciphertext))/binary>>,
@@ -416,8 +417,8 @@ pkcs7_unpad(Data) ->
 %%%===================================================================
 
 ecdh_es_agreed_key(Alg, KeyLen, Header, Public, Private) ->
-    Apu = jose_base64url:decode(maps:get(apu, Header, <<>>)),
-    Apv = jose_base64url:decode(maps:get(apv, Header, <<>>)),
+    Apu = jose_base64url:decode(maps:get(?apu, Header, <<>>)),
+    Apv = jose_base64url:decode(maps:get(?apv, Header, <<>>)),
     Curve = jwk:ec_named_curve(Public),
     EcPublic = jwk:key(Public, {ec_public, Curve}),
     Z = crypto:compute_key(ecdh, EcPublic, jwk:key(Private, {ec_private, Curve}), Curve),

@@ -4,6 +4,8 @@
 -module(jwt).
 
 %% Include files
+-include("names.hrl").
+
 
 %% Exported Functions
 
@@ -39,14 +41,14 @@ decode(JWT, Keys, Options) ->
 
 encode(Claims, JoseHeader, Key) ->
     Payload = jose_utils:encode_json(Claims),
-    case maps:is_key(enc, JoseHeader) of
+    case maps:is_key(?enc, JoseHeader) of
         true -> jwe:encode_compact(Payload, JoseHeader, Key);
         false -> jws:encode_compact(Payload, JoseHeader, Key)
     end.
 
 -spec is_expired(claims()) -> boolean().
 
-is_expired(#{exp := Exp}) ->
+is_expired(#{?exp := Exp}) ->
     jose_utils:unix_timestamp() > Exp;
 is_expired(#{}) ->
     false.    
@@ -57,8 +59,8 @@ is_expired(#{}) ->
 
 decode_steps(JWT, Keys, Options, Steps) ->
     Header = header(JWT),
-    IsJWT = maps:get(cty, Header, undefined) =:= <<"JWT">>,
-    IsJWE = maps:is_key(enc, Header),
+    IsJWT = maps:get(?cty, Header, undefined) =:= <<"JWT">>,
+    IsJWE = maps:is_key(?enc, Header),
     {JWT1, NewSteps} =
         case IsJWE of
             true ->

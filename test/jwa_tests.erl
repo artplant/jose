@@ -8,6 +8,7 @@
 
 %% Include files
 -include_lib("eunit/include/eunit.hrl").
+-include("names.hrl").
 
 %% https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41#appendix-A.1
 
@@ -69,32 +70,32 @@ concat_kdf_ecdh_es_draft40_test() ->
     ?assertEqual(?derived_key, jwa:concat_kdf(Z, 128, ?sz_string(<<"A128GCM">>), ?sz_string(<<"Alice">>), ?sz_string(<<"Bob">>), <<128:32>>, <<>>)).
 
 -define(header, 
-    #{alg => <<"ECDH-ES">>,
-      enc => <<"A128GCM">>,
-      apu => <<"QWxpY2U">>,
-      apv => <<"Qm9i">>,
-      epk => 
-       #{kty => <<"EC">>,
-         crv => <<"P-256">>,
-         x => <<"gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0">>,
-         y => <<"SLW_xSffzlPWrHEVI30DHM_4egVwt3NQqeUD7nMFpps">>
+    #{?alg => <<"ECDH-ES">>,
+      ?enc => <<"A128GCM">>,
+      ?apu => <<"QWxpY2U">>,
+      ?apv => <<"Qm9i">>,
+      ?epk => 
+       #{?kty => <<"EC">>,
+         ?crv => <<"P-256">>,
+         ?x => <<"gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0">>,
+         ?y => <<"SLW_xSffzlPWrHEVI30DHM_4egVwt3NQqeUD7nMFpps">>
        }
      }).
 
 -define(ec_ephemeral,
-    #{kty => <<"EC">>,
-      crv => <<"P-256">>,
-      x => <<"gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0">>,
-      y => <<"SLW_xSffzlPWrHEVI30DHM_4egVwt3NQqeUD7nMFpps">>,
-      d => <<"0_NxaRPUMQoAJt50Gz8YiTr8gRTwyEaCumd-MToTmIo">>
+    #{?kty => <<"EC">>,
+      ?crv => <<"P-256">>,
+      ?x => <<"gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0">>,
+      ?y => <<"SLW_xSffzlPWrHEVI30DHM_4egVwt3NQqeUD7nMFpps">>,
+      ?d => <<"0_NxaRPUMQoAJt50Gz8YiTr8gRTwyEaCumd-MToTmIo">>
      }).
 
 -define(ec_private,
-    #{kty => <<"EC">>,
-      crv => <<"P-256">>,
-      x => <<"weNJy2HscCSM6AEDTDg04biOvhFhyyWvOHQfeF_PxMQ">>,
-      y => <<"e8lnCO-AlStT-NJVX-crhB7QRYhiix03illJOVAOyck">>,
-      d => <<"VEmDZpDXXK8p8N0Cndsxs924q6nS1RXFASRl6BfUqdw">>
+    #{?kty => <<"EC">>,
+      ?crv => <<"P-256">>,
+      ?x => <<"weNJy2HscCSM6AEDTDg04biOvhFhyyWvOHQfeF_PxMQ">>,
+      ?y => <<"e8lnCO-AlStT-NJVX-crhB7QRYhiix03illJOVAOyck">>,
+      ?d => <<"VEmDZpDXXK8p8N0Cndsxs924q6nS1RXFASRl6BfUqdw">>
      }).
 
 consumer_key_agreement_es_test() ->
