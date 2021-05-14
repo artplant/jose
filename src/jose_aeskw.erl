@@ -42,10 +42,14 @@ iv() ->
 
 aes_encrypt(KEK, Data) when bit_size(KEK) =:= 128 ->
     crypto:crypto_one_time(aes_128_cbc, KEK, <<0:128>>, Data, true);
+aes_encrypt(KEK, Data) when bit_size(KEK) =:= 192 ->
+    crypto:crypto_one_time(aes_192_cbc, KEK, <<0:128>>, Data, true);
 aes_encrypt(KEK, Data) when bit_size(KEK) =:= 256 ->
     crypto:crypto_one_time(aes_256_cbc, KEK, <<0:128>>, Data, true).
 
 aes_decrypt(KEK, Data) when bit_size(KEK) =:= 128 ->
     crypto:crypto_one_time(aes_128_cbc, KEK, <<0:128>>, Data, false);
+aes_decrypt(KEK, Data) when bit_size(KEK) =:= 192 ->
+    crypto:crypto_one_time(aes_192_cbc, KEK, <<0:128>>, Data, false);
 aes_decrypt(KEK, Data) when bit_size(KEK) =:= 256 ->
     crypto:crypto_one_time(aes_256_cbc, KEK, <<0:128>>, Data, false).

@@ -43,7 +43,7 @@
 %   |                    | default initial    |        |                |
 %   |                    | value using 128    |        |                |
 %   |                    | bit key            |        |                |
-%   | A192KW             | AES Key Wrap with  | (none) | Optional       |
+%   | A192KW             | AES Key Wrap with  | (none) | Optional       | Implemented, untested
 %   |                    | default initial    |        |                |
 %   |                    | value using 192    |        |                |
 %   |                    | bit key            |        |                |
@@ -63,7 +63,7 @@
 %   |                    | Concat KDF and CEK | "apu", |                |
 %   |                    | wrapped with       | "apv"  |                |
 %   |                    | "A128KW"           |        |                |
-%   | ECDH-ES+A192KW     | ECDH-ES using      | "epk", | Optional       |
+%   | ECDH-ES+A192KW     | ECDH-ES using      | "epk", | Optional       | Implemented, untested
 %   |                    | Concat KDF and CEK | "apu", |                |
 %   |                    | wrapped with       | "apv"  |                |
 %   |                    | "A192KW"           |        |                |
@@ -101,7 +101,7 @@
 %   |               | authenticated encryption         |                |
 %   |               | algorithm, as defined in         |                |
 %   |               | Section 5.2.3                    |                |
-%   | A192CBC-HS384 | AES_192_CBC_HMAC_SHA_384         | Optional       |
+%   | A192CBC-HS384 | AES_192_CBC_HMAC_SHA_384         | Optional       | Implemented
 %   |               | authenticated encryption         |                |
 %   |               | algorithm, as defined in         |                |
 %   |               | Section 5.2.4                    |                |
@@ -259,9 +259,11 @@ verify(Alg, _Input, _Signature, _JWK) ->
 key_management_mode(<<"RSA1_5">>) -> key_encryption;
 key_management_mode(<<"RSA-OAEP">>) -> key_encryption;
 key_management_mode(<<"A128KW">>) -> key_wrapping;
+key_management_mode(<<"A192KW">>) -> key_wrapping;
 key_management_mode(<<"A256KW">>) -> key_wrapping;
 key_management_mode(<<"ECDH-ES">>) -> direct_key_agreement;
 key_management_mode(<<"ECDH-ES+A128KW">>) -> key_agreement_with_key_wrapping;
+key_management_mode(<<"ECDH-ES+A192KW">>) -> key_agreement_with_key_wrapping;
 key_management_mode(<<"ECDH-ES+A256KW">>) -> key_agreement_with_key_wrapping;
 key_management_mode(<<"dir">>) -> direct_key_agreement;
 key_management_mode(Alg) -> error({unsupported_alg, Alg}).
@@ -270,6 +272,8 @@ producer_agreed_key(<<"ECDH-ES">>, JWK, EcPrivateEphemeralKey, Header) ->
     ecdh_es_agreed_key(maps:get(?enc, Header), 128, Header, JWK, EcPrivateEphemeralKey);
 producer_agreed_key(<<"ECDH-ES+A128KW">> = Alg, JWK, EcPrivateEphemeralKey, Header) ->
     ecdh_es_agreed_key(Alg, 128, Header, JWK, EcPrivateEphemeralKey);
+producer_agreed_key(<<"ECDH-ES+A192KW">> = Alg, JWK, EcPrivateEphemeralKey, Header) ->
+    ecdh_es_agreed_key(Alg, 192, Header, JWK, EcPrivateEphemeralKey);
 producer_agreed_key(<<"ECDH-ES+A256KW">> = Alg, JWK, EcPrivateEphemeralKey, Header) ->
     ecdh_es_agreed_key(Alg, 256, Header, JWK, EcPrivateEphemeralKey);
 producer_agreed_key(<<"dir">>, SymmetricKey, _, _Header) ->
@@ -281,6 +285,8 @@ consumer_agreed_key(<<"ECDH-ES">>, JWK, Header) ->
     ecdh_es_agreed_key(maps:get(?enc, Header), 128, Header, maps:get(?epk, Header), JWK);
 consumer_agreed_key(<<"ECDH-ES+A128KW">> = Alg, JWK, Header) ->
     ecdh_es_agreed_key(Alg, 128, Header, maps:get(?epk, Header), JWK);
+consumer_agreed_key(<<"ECDH-ES+A192KW">> = Alg, JWK, Header) ->
+    ecdh_es_agreed_key(Alg, 192, Header, maps:get(?epk, Header), JWK);
 consumer_agreed_key(<<"ECDH-ES+A256KW">> = Alg, JWK, Header) ->
     ecdh_es_agreed_key(Alg, 256, Header, maps:get(?epk, Header), JWK);
 consumer_agreed_key(<<"dir">>, SymmetricKey, _Header) ->
@@ -300,6 +306,9 @@ encrypt_key(Alg, _CEK, _JWK) ->
 wrap_key(<<"A128KW">>, CEK, KEK) ->
     ?assertError(byte_size(KEK) =:= 128, badkey),
     jose_aeskw:key_wrap(KEK, CEK);
+wrap_key(<<"A192KW">>, CEK, KEK) ->
+    ?assertError(byte_size(KEK) =:= 192, badkey),
+    jose_aeskw:key_wrap(KEK, CEK);
 wrap_key(<<"A256KW">>, CEK, KEK) ->
     ?assertError(byte_size(KEK) =:= 256, badkey),
     jose_aeskw:key_wrap(KEK, CEK);
@@ -318,6 +327,9 @@ decrypt_key(Alg, _EncryptedKey, _Key) ->
 unwrap_key(<<"A128KW">>, EncryptedKey, KEK) ->
     ?assertError(bit_size(KEK) =:= 128, badkey),
     jose_aeskw:key_unwrap(KEK, EncryptedKey);
+unwrap_key(<<"A192KW">>, EncryptedKey, KEK) ->
+    ?assertError(bit_size(KEK) =:= 192, badkey),
+    jose_aeskw:key_unwrap(KEK, EncryptedKey);
 unwrap_key(<<"A256KW">>, EncryptedKey, KEK) ->
     ?assertError(bit_size(KEK) =:= 256, badkey),
     jose_aeskw:key_unwrap(KEK, EncryptedKey);
@@ -327,12 +339,14 @@ unwrap_key(Alg, _EncryptedKey, _KEK) ->
 -spec cek_size(jwe_enc()) -> pos_integer().
 
 cek_size(<<"A128CBC-HS256">>) -> 32;
+cek_size(<<"A192CBC-HS384">>) -> 48;
 cek_size(<<"A256CBC-HS512">>) -> 64;
 cek_size(Enc) -> error({unsupported_enc, Enc}).
 
 -spec iv_size(jwe_enc()) -> pos_integer().
 
 iv_size(<<"A128CBC-HS256">>) -> 16;
+iv_size(<<"A182CBC-HS384">>) -> 16;
 iv_size(<<"A256CBC-HS512">>) -> 16;
 iv_size(Enc) -> error({unsupported_enc, Enc}).
 
@@ -344,6 +358,13 @@ encrypt(<<"A128CBC-HS256">>, Plaintext, CEK, IV, AAD) ->
     Ciphertext = crypto:crypto_one_time(aes_128_cbc, ENC_KEY, IV, pkcs7_pad(Plaintext, 16), true),
     IntegrityData = <<AAD/binary, IV/binary, Ciphertext/binary, AL:8/big-unsigned-integer-unit:8>>,
     <<HMAC:16/binary, _/binary>> = crypto:mac(hmac, sha256, MAC_KEY, IntegrityData),
+    {Ciphertext, HMAC};
+encrypt(<<"A192CBC-HS384">>, Plaintext, CEK, IV, AAD) ->
+    <<MAC_KEY:24/binary, ENC_KEY:24/binary>> = CEK,
+    AL = bit_size(AAD),
+    Ciphertext = crypto:crypto_one_time(aes_192_cbc, ENC_KEY, IV, pkcs7_pad(Plaintext, 16), true),
+    IntegrityData = <<AAD/binary, IV/binary, Ciphertext/binary, AL:8/big-unsigned-integer-unit:8>>,
+    <<HMAC:24/binary, _/binary>> = crypto:mac(hmac, sha384, MAC_KEY, IntegrityData),
     {Ciphertext, HMAC};
 encrypt(<<"A256CBC-HS512">>, Plaintext, CEK, IV, AAD) ->
     <<MAC_KEY:32/binary, ENC_KEY:32/binary>> = CEK,
@@ -367,6 +388,16 @@ decrypt(<<"A128CBC-HS256">>, Ciphertext, CEK, IV, AAD, Tag, _Header) ->
         false -> error(invalid_authentication_tag)
     end,
     pkcs7_unpad(crypto:crypto_one_time(aes_128_cbc, ENC_KEY, IV, Ciphertext, false));
+decrypt(<<"A192CBC-HS384">>, Ciphertext, CEK, IV, AAD, Tag, _Header) ->
+    <<MAC_KEY:24/binary, ENC_KEY:24/binary>> = CEK,
+    AL = bit_size(AAD),
+    IntegrityData = <<AAD/binary, IV/binary, Ciphertext/binary, AL:8/big-unsigned-integer-unit:8>>,
+    <<HMAC:24/binary, _/binary>> = crypto:mac(hmac, sha384, MAC_KEY, IntegrityData),
+    case HMAC =:= Tag of
+        true -> ok;
+        false -> error(invalid_authentication_tag)
+    end,
+    pkcs7_unpad(crypto:crypto_one_time(aes_192_cbc, ENC_KEY, IV, Ciphertext, false));
 decrypt(<<"A256CBC-HS512">>, Ciphertext, CEK, IV, AAD, Tag, _Header) ->
     <<MAC_KEY:32/binary, ENC_KEY:32/binary>> = CEK,
     AL = bit_size(AAD),
