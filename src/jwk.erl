@@ -81,7 +81,10 @@ generate(ec, Curve) ->
     SymmetricPadding = (Size - byte_size(Private)) * 8,
     PadPrivate = <<0:SymmetricPadding, Private/binary>>,
     <<4, X:Size/binary, Y:Size/binary>> = Public,
-    #{?kty => <<"EC">>, ?crv => crypto_named_curve_to_crv(Curve), ?x => jose_base64url:encode(X), ?y => jose_base64url:encode(Y), ?d => jose_base64url:encode(PadPrivate)}.
+    #{?kty => <<"EC">>, ?crv => crypto_named_curve_to_crv(Curve), ?x => jose_base64url:encode(X), ?y => jose_base64url:encode(Y), ?d => jose_base64url:encode(PadPrivate)};
+generate(rsa, {_ModulusSize, _PublicExponent} = Params) ->
+    {_RsaPublic, RsaPrivate} = crypto:generate_key(rsa, Params),
+    rsa_private(RsaPrivate).
 
 -spec symmetric(jwa:symmetric()) -> jwk().
 
