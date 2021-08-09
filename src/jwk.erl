@@ -15,6 +15,7 @@
     load_pem/1,
     load_pem/2,
     load_der/1,
+    load_json/1,
     generate/2,
     symmetric/1,
     rsa_private/1,
@@ -74,6 +75,12 @@ load_pem(Filename, Password) ->
 load_der(Filename) ->
     {ok, Der} = file:read_file(Filename),
     der_entry_to_jwk('Certificate', Der).
+
+-spec load_json(file:filename_all()) -> jwk().
+
+load_json(Filename) ->
+    {ok, Binary} = file:read_file(Filename),
+    jose_utils:decode_json(Binary).    
 
 generate(ec, Curve) ->
     {Public, Private} = crypto:generate_key(ecdh, Curve),
