@@ -3,5 +3,5 @@
     {vsn,"0.2"},
     {modules,[]},
     {registered,[]},
-    {applications,[]}
+    {applications,[kernel,stdlib]}
 ]}.
